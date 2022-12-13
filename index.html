@@ -9,7 +9,26 @@
 </head>
 <body>
 
+<div class="score">
+    <span>Score: <span id="scoreEl">0</span></span>
+</div>
+
+<div id="endGame" class="modal">
+    <label class="title">Game Over</label>
+    <h1 id="endScore">0</h1>
+    <p class="points">Points</p>
+    <button id="reset-btn">Restart Game</button>
+</div>
+
+<div id="startGame" class="modal">
+    <h1 class="start-title">Base Defense Game</h1>
+    <button id="start-btn">Start Game</button>
+</div>
+
   <canvas></canvas>
 
 </body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js" integrity="sha512-gmwBmiTVER57N3jYS3LinA9eb8aHrJua5iQD7yqYCKa5x6Jjc7VDVaEA0je0Lu0bP9j7tEjV3+1qUm6loO99Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </html>
