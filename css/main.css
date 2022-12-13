@@ -1,4 +1,67 @@
 body {
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
+    background-color: #000000;
+}
+.score {
+    position: absolute;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+    user-select: none;
+}
+#endGame {
+    display: none;
+}
+
+.modal {
+    position: absolute;
+    background-color: #ffffff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.title {
+    font-size: 14px;
+    color: gray;
+}
+.start-title {
+    font-size: 24px;
+    margin-bottom: 0;
+    margin-top: 8px;
+}
+#endScore {
+    font-size: 48px;
+    margin-bottom: 0;
+    margin-top: 8px;
+}
+.points {
+    margin: 0;
+    font-size: 14px;
+    color: gray;
+}
+#reset-btn {
+    margin-top: 12px;
+    background-color: hsl(210, 80%, 54%);
+    border: none;
+    padding: 8px 16px;
+    color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#start-btn {
+    margin-top: 12px;
+    background-color: hsl(210, 80%, 54%);
+    border: none;
+    padding: 8px 16px;
+    color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
 }
