@@ -140,7 +140,7 @@ let animationId;
 let intervalId;
 let score = 0;
 
-
+// A function that can be called to reset all game values and reset the game.
 function init() {
     player = new Player(x, y, 10, 'white');
     projectiles = [];
@@ -150,6 +150,7 @@ function init() {
     scoreEl.innerHTML = '0';
 }
 
+// This function handles all logic related to enemy spawn locations and their movement.
 function spawnEnemies() {
     // Each second run this block of code.
     intervalId = setInterval(() => {
