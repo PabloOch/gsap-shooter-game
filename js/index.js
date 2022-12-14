@@ -83,6 +83,11 @@ class Enemy {
         this.radius = radius;
         this.color = color;
         this.velocity = velocity;
+        this.type = 'Linear';
+
+        if (Math.random() < 0.5) {
+            this.type = 'Homing';
+        }
     }
 
     draw() {
@@ -94,13 +99,19 @@ class Enemy {
 
     update() {
         this.draw();
+
+        if (this.type === 'Homing') {
+            const angle = Math.atan2(player.y - this.y, player.x - this.x);
+            this.velocity.x = Math.cos(angle);
+            this.velocity.y = Math.sin(angle);
+        }
+
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
     }
 }
 
 const friction = 0.99;
-
 class Particle {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -184,7 +195,7 @@ function animate() { // Animates all array elements
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions
 
-    player.update(); // Draws player object
+    player.update(); // Updates player object with movement
 
     for (let index = particles.length - 1; index >= 0; index--) { // Track all particles
         const particle = particles[index]; // Individual particle
@@ -212,7 +223,6 @@ function animate() { // Animates all array elements
         const enemy = enemies[index];
 
         enemy.update(); // Update object values
-
 
         const distance = Math.hypot( // The distance between player & enemy
             player.x - enemy.x,
@@ -283,13 +293,9 @@ addEventListener('click', (event) => {
         x: Math.cos(angle) * 5,
         y: Math.sin(angle) * 5
     };
-    projectiles.push(new Projectile(
-        player.x,
-        player.y,
-        5,
-        'white',
-        velocity
-    ));
+    projectiles.push(
+        new Projectile(player.x, player.y, 5, 'white', velocity
+        ));
 });
 
 // Restart game button
@@ -328,15 +334,15 @@ startButtonEl.addEventListener('click', () => {
 window.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'd' : player.velocity.x += 1;
-        break;
+            break;
 
         case 'a' : player.velocity.x -= 1;
-        break;
+            break;
 
         case 's' : player.velocity.y += 1;
-        break;
+            break;
 
         case 'w' : player.velocity.y -= 1;
-        break;
+            break;
     }
 });
