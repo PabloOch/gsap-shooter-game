@@ -16,7 +16,6 @@ canvas.height = innerHeight;
 
 // A class to define the behaviors / properties of the player.
 class Player {
-
     constructor(x, y, radius, color) {
         this.x = x;
         this.y = y;
@@ -32,6 +31,7 @@ class Player {
         ctx.fill();
     }
 }
+
 
 // A class to define the behaviors and properties of each projectile.
 class Projectile {
@@ -88,7 +88,8 @@ class Enemy {
 // A friction coefficient to apply to the particle effects to slow them the longer they've been active.
 // The closer to 1 the least amount of friction is applied.
 const friction = 0.99;
-//
+
+// This class is used to define the particle characteristics and behaviors.
 class Particle {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -127,8 +128,8 @@ class Particle {
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 
-// Creating the player object.
-let player = new Player(x, y, 10, 'white');
+// The player object, initially null to update later.
+let player;
 
 // To track and manage each enemy and projectile.
 let projectiles = [];
@@ -142,7 +143,7 @@ let score = 0;
 
 // A function that can be called to reset all game values and reset the game.
 function init() {
-    player = new Player(x, y, 10, 'white');
+    player = new Player(x, y, 10, 'violet'); // Creating the player object.
     projectiles = [];
     enemies = [];
     particles = [];
@@ -154,8 +155,8 @@ function init() {
 function spawnEnemies() {
     // Each second run this block of code.
     intervalId = setInterval(() => {
-        // Sets the radius of each enemy to be a random number between 5-30;
-        const radius = Math.random() * (30-5) + 5;
+        // Sets the radius of each enemy to be a random number between the specified values;
+        const radius = Math.random() * (35-5) + 5;
 
         // Initially null values to update later in order to maintain their scope.
         let x;
@@ -251,7 +252,7 @@ function animate() {
                 scale: 1,
                 opacity: 1,
                 ease: 'expo'
-            })
+            });
             modalScore.innerHTML = score; // Places the global score value in the game over modal.
         }
 
@@ -353,6 +354,7 @@ buttonEl.addEventListener('click', () => {
     });
 });
 
+// Start game button
 startButtonEl.addEventListener('click', () => {
     // Call the functions that start and maintain the game.
     init();
