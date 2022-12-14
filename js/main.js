@@ -59,7 +59,7 @@ class Projectile {
     }
 }
 
-// To define each enemy and its properties and actions.
+// A class to define each enemy and its properties and actions.
 class Enemy {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -241,7 +241,7 @@ function animate() {
         );
 
 
-        // If projectile hits players, end the game.
+        // If projectile hits the player, end the game.
         if (distance - player.radius - enemy.radius < 1) {
             cancelAnimationFrame(animationId);
             clearInterval(intervalId);
