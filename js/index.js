@@ -23,32 +23,36 @@ class Player {
         }
     }
 
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+    draw() { // Draw the player on the canvas.
+        ctx.beginPath(); // Creates a new 'path' on the canvas.
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); // Defines the location, size, and shape of the player.
+        ctx.fillStyle = this.color; // Colors the player.
+        ctx.fill(); // Applies the fillStyle above.
     }
 
-    update() {
-        this.draw();
+    update() { // Update the player's movement each time this is called (repeatedly).
+        this.draw(); // Call the function used to draw and color the player.
 
-        const friction = 0.97; // Friction to slow the player over time
-        this.velocity.x *= friction
-        this.velocity.y *= friction
+        const friction = 0.97; // Defining a friction amount to slow the player over time. The closer to 1 the less friction there is.
+        this.velocity.x *= friction // Applying the friction coefficient to the players speed in the x direction.
+        this.velocity.y *= friction // Applying the friction coefficient to the players speed in the y direction.
 
-        // Player collision detection for the x-axis
-        if (this.x + this.velocity.x + (this.radius + 15) <= canvas.width && this.x - this.radius + this.velocity.x >= 0) {
-            this.x += this.velocity.x;
+        /**
+         * Create a boundary on the x-axis of the screen, detecting player collision with the left and right of the screen.
+         */
+        if (this.x + this.velocity.x + (this.radius + 15) <= canvas.width && this.x - this.radius + this.velocity.x >= 0) { // If the player is within the screen boundaries
+            this.x += this.velocity.x; // Increase their speed by 1 each time this function is called.
         } else {
-            this.velocity.x = 0;
+            this.velocity.x = 0; // Otherwise, if the player touches the left or right boundary => stop its movement, creating an x-axis boundary.
         }
 
-        // Player collision detection for the y-axis
-        if (this.y + this.velocity.y + (this.radius + 15) <= canvas.height && this.y - this.radius + this.velocity.y >= 0) {
-            this.y += this.velocity.y;
+        /**
+         * Creating a boundary on the y-axis of the screen, detecting player collision with the top and bottom of the screen.
+         */
+        if (this.y + this.velocity.y + (this.radius + 15) <= canvas.height && this.y - this.radius + this.velocity.y >= 0) { // If player is within the top and bottom edges of the screen
+            this.y += this.velocity.y; // Increase their speed by 1 each time this function is called.
         } else {
-            this.velocity.y = 0;
+            this.velocity.y = 0; // Otherwise, if the player touches the top or bottom boundary => stop its movement, creating a y-axis boundary.
         }
     }
 }
@@ -90,14 +94,14 @@ class Enemy {
         }
     }
 
-    draw() {
+    draw() { // Draw enemy on canvas
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
 
-    update() {
+    update() { // Update enemy movement in the x & y direction.
         this.draw();
 
         if (this.type === 'Homing') {
@@ -111,7 +115,9 @@ class Enemy {
     }
 }
 
+// Setting a friction coefficient to apply to the particle effects.
 const friction = 0.99;
+
 class Particle {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -133,18 +139,20 @@ class Particle {
     }
 
     update() {
-        this.draw();
-        this.velocity.x *= friction;
-        this.velocity.y *= friction;
+        this.draw(); // Redraw the particle each time this function is called.
+        this.velocity.x *= friction; // Applying the friction over time.
+        this.velocity.y *= friction; // Applying the friction over time.
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
         this.alpha -= 0.01;
     }
 }
 
-
+// Setting initial location values to the center of the screen.
 const x = canvas.width / 2;
 const y = canvas.height / 2;
+
+// Initializing all global necessary global variables.
 let player;
 let projectiles = [];
 let enemies = [];
@@ -164,63 +172,73 @@ function init() { // Starts & restarts the game
 
 function spawnEnemies() {
     intervalId = setInterval(() => { // Every 1s
-        const radius = Math.random() * (35-5) + 5; // Random # between 5-35
+        const radius = Math.random() * (30-5) + 5; // Sets the size of each enemy to a random value between 5-30
         let x;
         let y;
 
-        if (Math.random() < 0.5) { // Spawns enemies on the left & right
+        if (Math.random() < 0.5) { // Spawns enemies on the left & right.
             x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
             y = Math.random() * canvas.height;
-        } else {                   // Spawns enemies on the top & bottom
+        } else {                   // Spawns enemies on the top & bottom.
             x = Math.random() * canvas.width;
             y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
         }
 
         const color = `hsl(${Math.random() * 360}, 50%, 50%)`; // Randomly color enemies
 
-        const angle = Math.atan2( // Angle between the player and enemy
+        const angle = Math.atan2( // Calculate the angle between the center of the screen and the enemy spawn location to determine which direction is towards the center.
             canvas.height / 2 - y,
             canvas.width / 2 - x);
 
-        const velocity = {
+        const velocity = { // Applies the result of the above calculation to finding the exact x:y ratio necessary to move the enemy in a straight line to the center.
             x: Math.cos(angle),
             y: Math.sin(angle)
         };
-        enemies.push(new Enemy(x, y, radius, color, velocity)); // Creates an enemy
+        enemies.push(new Enemy(x, y, radius, color, velocity)); // Creates an enemy and setting its individual properties and placing it in the array to track & manage.
     }, 1000);
 }
 
-function animate() { // Animates all array elements
-    animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement
+/**
+ * This function controls all animation used in the game. It starts the animation process and tracks each moving object (player, enemy, and projectiles), =>
+ *  > to detect any collisions and determine how to handle them. It repeatedly re-calls itself until told otherwise to continuously redraw the canvas and update movements.
+ * It alleviates memory leaks by looping through the array of each object from the back when managing any object removal =>
+ *  > (enemy-projectile collision, projectile-boundary collision).
+ * It also tracks and displays a user score while also creating a way for the player to lose and end all computation.
+ * Additionally, used to remove and display the 'start game' and 'game over' modals.
+ */
+function animate() {
+    animationId = requestAnimationFrame(animate); // Continuously re-calls itself to redraw the canvas, tracking all movement.
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions
+    ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions and starting axis position.
 
-    player.update(); // Updates player object with movement
+    player.update(); // Draws player object
 
     for (let index = particles.length - 1; index >= 0; index--) { // Track all particles
         const particle = particles[index]; // Individual particle
 
-        if (particle.alpha <= 0) { // Track when to remove particle effects
-            particles.splice(index, 1);
+        if (particle.alpha <= 0) { // Track when to remove particle effects.
+            particles.splice(index, 1); // Removes the individual particles after a short period.
         }
-        particle.update(); // Update object values
+        particle.update(); // Update object values to reflect the change in position on the canvas.
     }
 
-    for (let index = projectiles.length - 1; index >= 0; index--) { // Loop through and track each projectile
-        const projectile = projectiles[index]; // Individual projectile
+    // Looping through all the projectiles and tracking each one individually to perform actions on them.
+    for (let index = projectiles.length - 1; index >= 0; index--) {
+        const projectile = projectiles[index]; // grabbing each individual projectile.
         projectile.update(); // Constantly update the object properties
 
-        if (projectile.x + projectile.radius < 0 || // If projectile moves off the screen
-            projectile.x - projectile.radius > canvas.width ||
-            projectile.y + projectile.radius < 0 ||
-            projectile.y - projectile.radius > canvas.height
+        if (projectile.x + projectile.radius < 0 || // If projectile touches the left boundary.
+            projectile.x - projectile.radius > canvas.width || // If projectile touches the right boundary.
+            projectile.y + projectile.radius < 0 || // If the projectile touches the bottom boundary.
+            projectile.y - projectile.radius > canvas.height // if the projectile touches the top boundary.
         ) {
-            projectiles.splice(index, 1); // Remove projectile from array
+            projectiles.splice(index, 1); // Remove projectile from array if any of the above conditions are true. This prevents memory leaks.
         }
     }
 
-    for (let index = enemies.length -1; index >= 0; index--) { // Loop through and track each enemy
-        const enemy = enemies[index];
+    // Looping through the array of enemies and tracking each one individually to apply actions on them.
+    for (let index = enemies.length -1; index >= 0; index--) {
+        const enemy = enemies[index]; //
 
         enemy.update(); // Update object values
 
@@ -230,7 +248,7 @@ function animate() { // Animates all array elements
         );
 
         // End game
-        if (distance - player.radius - enemy.radius < 1) {
+        if (distance - player.radius - enemy.radius < 1) { // If the distance
             cancelAnimationFrame(animationId); // End animation
             clearInterval(intervalId); // End interval
 
@@ -271,7 +289,7 @@ function animate() { // Animates all array elements
                         radius: enemy.radius - 10
                     });
                     projectiles.splice(projectileIndex, 1); // Remove collided bullet
-                } else { // When the enemy is destroyed
+                } else { // When the enemy is destroyed.
                     score += 150;
                     scoreEl.innerHTML = score; // Update template
 
@@ -283,17 +301,18 @@ function animate() { // Animates all array elements
     }
 }
 
-// Spawn projectiles & calculate direction
+// Spawn projectiles & calculate direction.
 addEventListener('click', (event) => {
-    const angle = Math.atan2(
+
+    const angle = Math.atan2( // Calculate the angle between the players location and where the click occurred.
         event.clientY - player.y,
         event.clientX - player.x);
 
-    const velocity = {
+    const velocity = { // The speed at which the projectile moves.
         x: Math.cos(angle) * 5,
         y: Math.sin(angle) * 5
     };
-    projectiles.push(
+    projectiles.push( // Using calculated values to create & store a new projectile object.
         new Projectile(player.x, player.y, 5, 'white', velocity
         ));
 });
@@ -301,14 +320,14 @@ addEventListener('click', (event) => {
 // Restart game button
 buttonEl.addEventListener('click', () => {
     init(); // Start computation
-    animate();
-    spawnEnemies();
+    animate(); // Starts animation
+    spawnEnemies(); // Spawns and controls enemies
     gsap.to('#endGame', {
         opacity: 0,
         scale: 0.8,
         duration: 0.2,
         ease: 'expo.in',
-        onComplete: () => {
+        onComplete: () => { // When the animation completes, remove the modal from the DOM.
             modalEl.style.display = 'none';
         }
     });
@@ -317,32 +336,32 @@ buttonEl.addEventListener('click', () => {
 // Start game button
 startButtonEl.addEventListener('click', () => {
     init(); // start computation
-    animate();
-    spawnEnemies();
+    animate(); // Start animation
+    spawnEnemies(); // Spawns and controls enemies
     gsap.to('#startGame', {
         opacity: 0,
         scale: 0.8,
         duration: 0.2,
         ease: 'expo.in',
-        onComplete: () => {
+        onComplete: () => { // When the animation completes, remove the modal from the DOM.
             startModalEl.style.display = 'none';
         }
     });
 });
 
-// Listen for player movement
+// Listen for user input to determine player movement.
 window.addEventListener('keydown', (event) => {
     switch (event.key) {
-        case 'd' : player.velocity.x += 1;
+        case 'd' : player.velocity.x += 1; // If user presses D, move the player right (+x) by increasing it's x-velocity by 1.
             break;
 
-        case 'a' : player.velocity.x -= 1;
+        case 'a' : player.velocity.x -= 1; // If user presses A, move the player left (-x) by decreasing it's x-velocity by 1.
             break;
 
-        case 's' : player.velocity.y += 1;
+        case 's' : player.velocity.y += 1; // If user presses S, move the player down (-y) by decreasing it's y-velocity by 1.
             break;
 
-        case 'w' : player.velocity.y -= 1;
+        case 'w' : player.velocity.y -= 1; // If user presses W, move the player left (+y) by increasing it's y-velocity by 1.
             break;
     }
 });
