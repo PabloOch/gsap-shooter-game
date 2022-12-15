@@ -40,7 +40,7 @@ class Player {
         /**
          * Create a boundary on the x-axis of the screen, detecting player collision with the left and right of the screen.
          */
-        if (this.x + this.velocity.x + (this.radius + 15) <= canvas.width && this.x - this.radius + this.velocity.x >= 0) { // If the player is within the screen boundaries
+        if (this.x + this.velocity.x + (this.radius + 15) <= canvas.width && this.x - this.radius + this.velocity.x >= 0) { // If the player is within the left and right edges of the screen.
             this.x += this.velocity.x; // Increase their speed by 1 each time this function is called.
         } else {
             this.velocity.x = 0; // Otherwise, if the player touches the left or right boundary => stop its movement, creating an x-axis boundary.
@@ -58,6 +58,7 @@ class Player {
 }
 
 class Projectile {
+    // Each projectile is initialized with a base x & y position, a radius (size), color, and base movement speed.
     constructor(x, y, radius, color, velocity) {
         this.x = x;
         this.y = y;
@@ -104,12 +105,13 @@ class Enemy {
     update() { // Update enemy movement in the x & y direction.
         this.draw();
 
-        if (this.type === 'Homing') {
+        if (this.type === 'Homing') { // If an enemy spawns with its type as 'Homing' (50% chance) calculate the angle and velocity differently.
             const angle = Math.atan2(player.y - this.y, player.x - this.x);
             this.velocity.x = Math.cos(angle);
             this.velocity.y = Math.sin(angle);
         }
 
+        // Setting the enemies position to the new values.
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
     }
@@ -161,15 +163,18 @@ let animationId;
 let intervalId;
 let score = 0;
 
-function init() { // Starts & restarts the game
-    player = new Player(x, y, 10, 'violet'); // Creating the player object
+function init() { // Can be called to start/restart the game. Resets all game properties.
+    player = new Player(x, y, 10, 'violet'); // Creating the player object & setting its properties.
     projectiles = [];
     enemies = [];
     particles = [];
     score = 0;
-    scoreEl.innerHTML = '0'; // Resetting the template
+    scoreEl.innerHTML = '0'; // Resetting the score on the template.
 }
 
+/**
+ * This function handles all enemy creations and their necessary calculations.
+ */
 function spawnEnemies() {
     intervalId = setInterval(() => { // Every 1s
         const radius = Math.random() * (30-5) + 5; // Sets the size of each enemy to a random value between 5-30
@@ -211,10 +216,10 @@ function animate() {
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions and starting axis position.
 
-    player.update(); // Draws player object
+    player.update(); // Calls the function to update player values to reflect changes.
 
-    for (let index = particles.length - 1; index >= 0; index--) { // Track all particles
-        const particle = particles[index]; // Individual particle
+    for (let index = particles.length - 1; index >= 0; index--) { // Track all particles.
+        const particle = particles[index]; // Individual particle.
 
         if (particle.alpha <= 0) { // Track when to remove particle effects.
             particles.splice(index, 1); // Removes the individual particles after a short period.
@@ -225,7 +230,7 @@ function animate() {
     // Looping through all the projectiles and tracking each one individually to perform actions on them.
     for (let index = projectiles.length - 1; index >= 0; index--) {
         const projectile = projectiles[index]; // grabbing each individual projectile.
-        projectile.update(); // Constantly update the object properties
+        projectile.update(); // Constantly update the object properties.
 
         if (projectile.x + projectile.radius < 0 || // If projectile touches the left boundary.
             projectile.x - projectile.radius > canvas.width || // If projectile touches the right boundary.
@@ -238,7 +243,7 @@ function animate() {
 
     // Looping through the array of enemies and tracking each one individually to apply actions on them.
     for (let index = enemies.length -1; index >= 0; index--) {
-        const enemy = enemies[index]; //
+        const enemy = enemies[index];
 
         enemy.update(); // Update object values
 
@@ -248,24 +253,24 @@ function animate() {
         );
 
         // End game
-        if (distance - player.radius - enemy.radius < 1) { // If the distance
+        if (distance - player.radius - enemy.radius < 1) { // If a player and enemy collide.
             cancelAnimationFrame(animationId); // End animation
             clearInterval(intervalId); // End interval
 
-            modalEl.style.display = 'block'; // Toggle restart modal
-            gsap.fromTo('#endGame', {scale: 0.8, opacity: 0}, { // Modal animation
+            modalEl.style.display = 'block'; // Toggle restart game modal.
+            gsap.fromTo('#endGame', {scale: 0.8, opacity: 0}, { // Game over modal animation.
                 scale: 1,
                 opacity: 1,
                 ease: 'expo'
             });
-            modalScore.innerHTML = score; // Update template
+            modalScore.innerHTML = score; // Reflect player score on the template.
         }
 
 
         for (let projectileIndex = projectiles.length - 1; projectileIndex >= 0; projectileIndex--) { // Check each projectile for collisions
             const projectile = projectiles[projectileIndex];
 
-            const distance = Math.hypot( // The distance between a projectile and an enemy
+            const distance = Math.hypot( // Calculate the distance between a projectile and an enemy using pythagorean theorem.
                 projectile.x - enemy.x,
                 projectile.y - enemy.y
             );
