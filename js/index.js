@@ -286,7 +286,7 @@ function animate() {
                     );
                 }
 
-                if (enemy.radius - 10 > 7 ) { // Shrink enemy on collision.
+                if (enemy.radius - 10 > 7 ) { // Shrink enemy on collision
                     score += 100;
                     scoreEl.innerHTML = score;
 
@@ -298,7 +298,7 @@ function animate() {
                     score += 150;
                     scoreEl.innerHTML = score; // Update template
 
-                    enemies.splice(index, 1); // Remove enemy.
+                    enemies.splice(index, 1); // Remove enemy
                     projectiles.splice(projectileIndex, 1); // Remove bullet
                 }
             }
@@ -306,7 +306,7 @@ function animate() {
     }
 }
 
-// Spawn projectiles & calculate direction.
+// Spawn projectiles & calculate direction
 addEventListener('click', (event) => {
 
     const angle = Math.atan2( // Calculate the angle between the players location and where the click occurred.
@@ -354,7 +354,7 @@ startButtonEl.addEventListener('click', () => {
     });
 });
 
-// Listen for user input to determine player movement.
+// Listen for user input to determine player movement
 window.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'd' : player.velocity.x += 1; // If user presses D, move the player right (+x) by increasing it's x-velocity by 1.
