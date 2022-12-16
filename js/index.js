@@ -311,15 +311,17 @@ addEventListener('click', (event) => {
 
     const angle = Math.atan2( // Calculate the angle between the players location and where the click occurred.
         event.clientY - player.y,
-        event.clientX - player.x);
+        event.clientX - player.x
+    );
 
     const velocity = { // The speed at which the projectile moves.
         x: Math.cos(angle) * 5,
         y: Math.sin(angle) * 5
     };
+
     projectiles.push( // Using calculated values to create & store a new projectile object.
         new Projectile(player.x, player.y, 5, 'white', velocity
-        ));
+    ));
 });
 
 // Restart game button
