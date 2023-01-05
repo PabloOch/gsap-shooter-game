@@ -86,7 +86,7 @@ function spawnPowerUps() {
                     y: 0
                 }
             }));
-    }, 10000); // Every 10 seconds.
+    }, 9000); // Every 10 seconds.
 }
 
 function createScoreLabels({ position, score }) { // Create dynamic score labels in the DOM.
