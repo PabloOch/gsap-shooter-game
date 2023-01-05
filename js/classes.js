@@ -8,6 +8,7 @@ class Player {
             x: 0,
             y: 0
         }
+        this.powerUp = '';
     }
 
     draw() { // Draw the player on the canvas.
@@ -178,7 +179,8 @@ class PowerUp {
             alpha: 0,
             duration: .4,
             repeat: -1,
-            yoyo: true
+            yoyo: true,
+            ease: 'linear'
         });
 
         this.radians = 0;
@@ -190,12 +192,13 @@ class PowerUp {
         ctx.translate(this.position.x + this.image.width / 2, this.position.y + this.image.height / 2);
         ctx.rotate(this.radians);
         ctx.translate(-this.position.x - this.image.width / 2, -this.position.y - this.image.height / 2);
-        ctx.drawImage(this.image, 100, 100);
+        ctx.drawImage(this.image, this.position.x, this.position.y);
         ctx.restore();
     }
 
     update() {
         this.draw();
         this.radians += 0.01;
+        this.position.x += this.velocity.x;
     }
 }
