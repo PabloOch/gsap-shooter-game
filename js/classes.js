@@ -170,10 +170,10 @@ class PowerUp {
         this.position = position;
         this.velocity = velocity;
 
-        this.image = new Image();
-        this.image.src = './img/lightningBolt.png';
+        this.image = new Image(); // Creating js image object.
+        this.image.src = './img/lightningBolt.png'; // Setting its source path.
 
-        this.alpha = 1;
+        this.alpha = 1; // Resetting the alpha value back to default.
 
         gsap.to(this, {
             alpha: 0,
@@ -183,22 +183,22 @@ class PowerUp {
             ease: 'linear'
         });
 
-        this.radians = 0;
+        this.radians = 0; // Resetting the radians value.
     }
 
     draw() {
-        ctx.save();
+        ctx.save(); // Begin snapshot on the canvas.
         ctx.globalAlpha = this.alpha;
-        ctx.translate(this.position.x + this.image.width / 2, this.position.y + this.image.height / 2);
-        ctx.rotate(this.radians);
-        ctx.translate(-this.position.x - this.image.width / 2, -this.position.y - this.image.height / 2);
-        ctx.drawImage(this.image, this.position.x, this.position.y);
-        ctx.restore();
+        ctx.translate(this.position.x + this.image.width / 2, this.position.y + this.image.height / 2); // Translate the canvas focus to the power up image
+        ctx.rotate(this.radians); // Rotate the canvas at the focus point.
+        ctx.translate(-this.position.x - this.image.width / 2, -this.position.y - this.image.height / 2); // Undo the translation
+        ctx.drawImage(this.image, this.position.x, this.position.y); // Draw the power up image on the canvas.
+        ctx.restore(); // End the snapshot.
     }
 
     update() {
         this.draw();
-        this.radians += 0.01;
-        this.position.x += this.velocity.x;
+        this.radians += 0.01; // Apply an increment to the rotation angle each frame.
+        this.position.x += this.velocity.x; // Apply a velocity vector to the power up each frame.
     }
 }
