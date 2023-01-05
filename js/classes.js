@@ -8,7 +8,7 @@ class Player {
             x: 0,
             y: 0
         }
-        this.powerUp = '';
+        this.powerUp = '' || null;
     }
 
     draw() { // Draw the player on the canvas.
@@ -189,14 +189,14 @@ class PowerUp {
             ease: 'linear' // Smooth ease animation
         });
 
-        this.radians = 0; // Resetting the radians value.
+        this.radians = 0; // Initially 0 radians / rotation value.
     }
 
     draw() {
         ctx.save(); // Begin snapshot on the canvas.
         ctx.globalAlpha = this.alpha;
         ctx.translate(this.position.x + this.image.width / 2, this.position.y + this.image.height / 2); // Translate the canvas focus to the power up image
-        ctx.rotate(this.radians); // Rotate the canvas at the focus point.
+        ctx.rotate(this.radians); // Rotate the canvas at the new focus point.
         ctx.translate(-this.position.x - this.image.width / 2, -this.position.y - this.image.height / 2); // Undo the translation
         ctx.drawImage(this.image, this.position.x, this.position.y); // Draw the power up image on the canvas.
         ctx.restore(); // End the snapshot.
