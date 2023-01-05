@@ -18,10 +18,9 @@ const mouse = {
 canvas.width = innerWidth; // Window width
 canvas.height = innerHeight; // Window height
 
-const friction = 0.99;
-
 const x = canvas.width / 2;
 const y = canvas.height / 2;
+const friction = 0.99;
 let player;
 let projectiles = [];
 let enemies = [];
@@ -51,26 +50,27 @@ function spawnEnemies() {
         let x;
         let y;
 
-        if (Math.random() < 0.5) { // Spawns enemies on the left & right
+        if (Math.random() < 0.5) { // Spawns enemies on the left & right.
             x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-            y = Math.random() * canvas.height;
-        } else {                   // Spawns enemies on the top & bottom
-            x = Math.random() * canvas.width;
+            y = Math.random() * canvas.height; // Within the horizontal boundary.
+        } else {                   // Spawns enemies on the top & bottom.
+            x = Math.random() * canvas.width; // Within the vertical boundary.
             y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
         }
 
-        const color = `hsl(${Math.random() * 360}, 50%, 50%)`; // Randomly color enemies
+        const color = `hsl(${Math.random() * 360}, 50%, 50%)`; // Randomly color enemies.
 
-        const angle = Math.atan2( // Angle between the player and enemy
+        const angle = Math.atan2( // Angle between the player and enemy.
             canvas.height / 2 - y,
-            canvas.width / 2 - x);
+            canvas.width / 2 - x
+        );
 
         const velocity = {
             x: Math.cos(angle),
             y: Math.sin(angle)
         };
         enemies.push(new Enemy(x, y, radius, color, velocity)); // Creates an enemy
-    }, 1000);
+    }, 1000); // 1s
 }
 
 function spawnPowerUps() {
@@ -111,21 +111,22 @@ function createScoreLabels({ position, score }) { // Create dynamic score labels
 
 }
 
-function animate() { // Animates all array elements
-    animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement
-    ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions
+function animate() { // Animates all array elements.
+    animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement.
+    ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background.
+    ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions.
     frames++;
 
     player.update(); // Draws player object
 
-    for (let i = powerUps.length - 1; i >= 0; i--) {
+    // Looping from the back of the array helps when rapidly removing elements from the array.
+    for (let i = powerUps.length - 1; i >= 0; i--) { // Looping through all power ups from the back of the array.
         const powerUp = powerUps[i];
 
-        if (powerUp.position.x > canvas.width) {
-            powerUps.splice(i, 1);
-        } else {
-            powerUp.update();
+        if (powerUp.position.x > canvas.width) { // If the power up reaches the right boundary.
+            powerUps.splice(i, 1); // Remove it from computation.
+        } else {              // Otherwise
+            powerUp.update(); // Update its position as usual.
         }
 
         const distance = Math.hypot( // Calculate the distance between player & a power up.
@@ -134,15 +135,15 @@ function animate() { // Animates all array elements
         );
 
         // Gain power-up
-        if (distance < powerUp.image.height / 2 + player.radius) {
-            powerUps.splice(i, 1);
-            player.powerUp = 'MachineGun';
-            player.color = 'yellow';
+        if (distance < powerUp.image.height / 2 + player.radius) { // Player and power up collide.
+            powerUps.splice(i, 1); // Remove it from computation after pick up.
+            player.powerUp = 'MachineGun'; // Updating player power up property.
+            player.color = 'yellow'; // Changing player color to reflect power-up pick up.
 
-            setTimeout(() => {
-                player.powerUp = '';
-                player.color = 'white';
-            }, 6000);
+            setTimeout(() => { // After 6s, remove the power up ability.
+                player.powerUp = ''; // Reset player power-up property.
+                player.color = 'white'; // Return player to original color.
+            }, 6000); // 6s.
         }
     }
 
@@ -161,11 +162,12 @@ function animate() { // Animates all array elements
 
         // Every 3 frames, spawn a new projectile during power-up duration.
         if (frames % 3 === 0) {
-            projectiles.push(new Projectile(player.x, player.y, 5, 'yellow', velocity));
+            projectiles.push(new Projectile(player.x, player.y, 5, 'yellow', velocity)); // Create a new projectile every 3 frames.
         }
     }
 
 
+    // Looping through all particles from the back of the array.
     for (let index = particles.length - 1; index >= 0; index--) { // Track all particles
         const particle = particles[index]; // Individual particle
 
@@ -175,10 +177,12 @@ function animate() { // Animates all array elements
         particle.update(); // Update object values
     }
 
-    for (let index = projectiles.length - 1; index >= 0; index--) { // Loop through and track each projectile
-        const projectile = projectiles[index]; // Individual projectile
-        projectile.update(); // Constantly update the object properties
+    // Looping from the back of the array to help avoid removing the wrong element when rapidly removing elements.
+    for (let index = projectiles.length - 1; index >= 0; index--) { // Loop through and track each projectile.
+        const projectile = projectiles[index]; // Individual projectile.
+        projectile.update(); // Constantly update the object properties.
 
+        // Track if projectile hits the screen boundaries.
         if (projectile.x + projectile.radius < 0 || // If projectile moves off the screen
             projectile.x - projectile.radius > canvas.width ||
             projectile.y + projectile.radius < 0 ||
@@ -188,6 +192,7 @@ function animate() { // Animates all array elements
         }
     }
 
+    // Looping from the back of the array to help with element removal.
     for (let index = enemies.length -1; index >= 0; index--) { // Loop through and track each enemy
         const enemy = enemies[index];
 
@@ -199,7 +204,7 @@ function animate() { // Animates all array elements
         );
 
         // End game
-        if (distance - player.radius - enemy.radius < 1) {
+        if (distance - player.radius - enemy.radius < 1) { // Enemy and player collision.
             cancelAnimationFrame(animationId); // End animation
             clearInterval(intervalId); // End interval
 
@@ -213,6 +218,7 @@ function animate() { // Animates all array elements
         }
 
 
+        // Looping through all projectiles to manage and track their properties and collisions.
         for (let projectileIndex = projectiles.length - 1; projectileIndex >= 0; projectileIndex--) { // Check each projectile for collisions
             const projectile = projectiles[projectileIndex];
 
@@ -233,19 +239,18 @@ function animate() { // Animates all array elements
                 }
 
                 if (enemy.radius - 10 > 7 ) { // Shrink enemy on collision.
-                    score += 100;
-                    scoreEl.innerHTML = score;
+                    score += 100; // Increment score.
+                    scoreEl.innerHTML = score; // Update template
 
                     gsap.to(enemy, { // Smooth shrink animation
                         radius: enemy.radius - 10
                     });
-                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 100});
+                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 100}); // Create score label each collision
                     projectiles.splice(projectileIndex, 1); // Remove collided bullet
                 } else { // When the enemy is destroyed.
-                    score += 150;
+                    score += 150; // Increment score
                     scoreEl.innerHTML = score; // Update template
-                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 150});
-
+                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 150}); // Create a score label for each elimination.
                     enemies.splice(index, 1); // Remove enemy.
                     projectiles.splice(projectileIndex, 1); // Remove bullet
                 }
@@ -270,7 +275,7 @@ addEventListener('click', (event) => {
     ));
 });
 
-addEventListener('mousemove', (event) => {
+addEventListener('mousemove', (event) => { // Track exact mouse position.
     mouse.position.x = event.clientX;
     mouse.position.y = event.clientY;
 });
@@ -278,9 +283,9 @@ addEventListener('mousemove', (event) => {
 // Restart game button
 buttonEl.addEventListener('click', () => {
     init(); // Start computation
-    animate();
-    spawnEnemies();
-    spawnPowerUps();
+    animate(); // Begin animation
+    spawnEnemies(); // Spawn enemies
+    spawnPowerUps(); // Spawn player power ups
     gsap.to('#endGame', {
         opacity: 0,
         scale: 0.8,
