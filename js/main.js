@@ -75,36 +75,37 @@ function spawnEnemies() {
 
 function spawnPowerUps() {
     setInterval(() => {
-        powerUps.push(
+        powerUps.push( // Create new power up
             new PowerUp({
                 position: {
-                    x: -30,
-                    y: Math.random() * canvas.height
+                    x: -30, // Spawn to the left of the screen.
+                    y: Math.random() * canvas.height // Within the screen
                 },
                 velocity: {
-                    x: Math.random() + 1,
+                    x: Math.random() + 1, // Random speed between 1 and 2.
                     y: 0
                 }
             }));
-    }, 10000);
+    }, 10000); // Every 10 seconds.
 }
 
-function createScoreLabels({ position, score }) {
-    const scoreLabel = document.createElement('label');
-    scoreLabel.innerHTML = score;
-    scoreLabel.style.color = 'white';
-    scoreLabel.style.position = 'absolute';
-    scoreLabel.style.left = position.x + 'px';
-    scoreLabel.style.top = position.y + 'px';
-    scoreLabel.style.userSelect = 'none';
-    document.body.appendChild(scoreLabel);
+function createScoreLabels({ position, score }) { // Create dynamic score labels in the DOM.
+    const scoreLabel = document.createElement('label'); // Creating label element.
+    scoreLabel.innerHTML = score; // Setting its content to the necessary score that is passed in.
+    scoreLabel.style.color = 'white'; // Setting it to white.
+    scoreLabel.style.position = 'absolute'; // Setting its position property to absolute to allow overlaying.
+    scoreLabel.style.left = position.x + 'px'; // collision position on the y-axis.
+    scoreLabel.style.top = position.y + 'px'; // collision position on the x-axis.
+    scoreLabel.style.userSelect = 'none'; // Make it un-highlightable by the user.
+    document.body.appendChild(scoreLabel); // Adding the label to the DOM.
 
+    // Create the raise and fade away effect on the score label.
     gsap.to(scoreLabel, {
-       opacity: 0,
+        opacity: 0,
         y: -30,
         duration: 0.75,
         onComplete: () => { // When animation completes
-           scoreLabel.parentNode.removeChild(scoreLabel); // Remove the score label from the DOM.
+           scoreLabel.parentNode.removeChild(scoreLabel); // Garbage collection, remove the score label from the DOM.
         }
     });
 
