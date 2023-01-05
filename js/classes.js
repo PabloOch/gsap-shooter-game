@@ -25,7 +25,6 @@ class Player {
         this.velocity.x *= friction // Applying the friction coefficient to the players speed in the x direction.
         this.velocity.y *= friction // Applying the friction coefficient to the players speed in the y direction.
 
-
         /**
          * Player collision detection for the x-axis.
          */
@@ -81,13 +80,13 @@ class Enemy {
             y
         }
 
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.5) { // 50% chance to set enemy type to homing
             this.type = 'Homing';
 
-            if (Math.random() < 0.5) {
+            if (Math.random() < 0.5) { // Lesser chance to set enemy type to spinning (harder difficulty).
                 this.type = 'Spinning';
 
-                if (Math.random() < 0.5) {
+                if (Math.random() < 0.5) { // Even lesser chance to set enemy type to homing and spinning
                     this.type = 'Homing Spinning';
                 }
             }
@@ -103,34 +102,41 @@ class Enemy {
 
     update() { // Update enemy movement in the x & y direction
         this.draw();
-        this.radians += 0.1;
+        this.radians += 0.1; // Increment radians each frame to apply to spinning enemies.
 
-        if (this.type === 'Spinning') {
-            this.center.x += this.velocity.x;
-            this.center.y += this.velocity.y;
-
-            this.x = this.center.x + Math.cos(this.radians) * 20;
-            this.y = this.center.y + Math.sin(this.radians) * 20;
-        } else if (this.type === 'Homing') {
-            const angle = Math.atan2(player.y - this.y, player.x - this.x);
-            this.velocity.x = Math.cos(angle);
-            this.velocity.y = Math.sin(angle);
-
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
-        } else if (this.type === 'Homing Spinning') {
-            const angle = Math.atan2(player.y - this.center.y, player.x - this.center.x);
-            this.velocity.x = Math.cos(angle);
-            this.velocity.y = Math.sin(angle);
-
-            this.center.x += this.velocity.x;
-            this.center.y += this.velocity.y;
+        if (this.type === 'Spinning') { // If type is spinning
+            this.center.x += this.velocity.x; // Applying an x-velocity vector each frame to the invisible center that the enemy orbits.
+            this.center.y += this.velocity.y; // Applying a y-velocity vector each frame to the invisible center that the enemy orbits.
 
             this.x = this.center.x + Math.cos(this.radians) * 20;
             this.y = this.center.y + Math.sin(this.radians) * 20;
-        } else {
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
+
+        } else if (this.type === 'Homing') { // If type is homing
+            const angle = Math.atan2(player.y - this.y, player.x - this.x); // Calculate angle between player and enemy.
+
+            // When cos and sin are used in tandem they give us the perfect ratio needed to move an object along a circular path.
+            this.velocity.x = Math.cos(angle); // Calculate the x velocity necessary to move towards the player.
+            this.velocity.y = Math.sin(angle); // Calculate the y velocity necessary to move towards the player.
+
+            this.x += this.velocity.x; // Applying the calculated x velocity to the enemies position.
+            this.y += this.velocity.y; // Applying the calculated y velocity to the enemies position.
+
+        } else if (this.type === 'Homing Spinning') { // If type is homing and spinning.
+            const angle = Math.atan2(player.y - this.center.y, player.x - this.center.x); // Calculate angle between the player and the center point of enemy orbit.
+
+            this.velocity.x = Math.cos(angle); // Tracking the circular velocity
+            this.velocity.y = Math.sin(angle); // Tracking the circular velocity
+
+            this.center.x += this.velocity.x; // Update the invisible center the enemy orbits around.
+            this.center.y += this.velocity.y; // Update the invisible center the enemy orbits around.
+
+            this.x = this.center.x + Math.cos(this.radians) * 20; // Applying product of the circular motion to the x position.
+            this.y = this.center.y + Math.sin(this.radians) * 20; // Applying product of the circular motion to the y position.
+
+        } else { // Default linear motion case
+
+            this.x += this.velocity.x; // Applying basic velocity to the enemies x value.
+            this.y += this.velocity.y; // Applying basic velocity to the enemies x value.
         }
     }
 }
@@ -167,20 +173,20 @@ class Particle {
 
 class PowerUp {
     constructor({position = {x: 0, y: 0}, velocity}) {
-        this.position = position;
-        this.velocity = velocity;
+        this.position = position; // Initial position
+        this.velocity = velocity; // Initial velocity
 
         this.image = new Image(); // Creating js image object.
         this.image.src = './img/lightningBolt.png'; // Setting its source path.
 
         this.alpha = 1; // Resetting the alpha value back to default.
 
-        gsap.to(this, {
-            alpha: 0,
-            duration: .4,
-            repeat: -1,
-            yoyo: true,
-            ease: 'linear'
+        gsap.to(this, { // Creating the blinking animation on the power up.
+            alpha: 0, // Reducing the object's alpha value
+            duration: .4, // Over 4 seconds
+            repeat: -1, // And repeat it over and over
+            yoyo: true, // Then undo the changed values to give a yo-yo effect.
+            ease: 'linear' // Smooth ease animation
         });
 
         this.radians = 0; // Resetting the radians value.
@@ -197,7 +203,7 @@ class PowerUp {
     }
 
     update() {
-        this.draw();
+        this.draw(); // Redrawing the power up object each frame.
         this.radians += 0.01; // Apply an increment to the rotation angle each frame.
         this.position.x += this.velocity.x; // Apply a velocity vector to the power up each frame.
     }
