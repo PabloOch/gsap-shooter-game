@@ -8,6 +8,13 @@ const buttonEl = document.getElementById('reset-btn');
 const startButtonEl = document.getElementById('start-btn');
 const startModalEl = document.getElementById('startGame');
 
+const mouse = {
+    position: {
+        x: 0,
+        y: 0
+    }
+}
+
 canvas.width = innerWidth; // Window width
 canvas.height = innerHeight; // Window height
 
@@ -22,20 +29,20 @@ let particles = [];
 let animationId;
 let intervalId;
 let score = 0;
-let powerUp = new PowerUp({
-    position: {
-        x: 100,
-        y: 100
-    }
-});
+let powerUps = [];
+let frames = 0;
+
+
 
 function init() { // Starts & restarts the game
     player = new Player(x, y, 10, 'white'); // Creating the player object
     projectiles = [];
     enemies = [];
     particles = [];
+    powerUps = [];
     score = 0;
     scoreEl.innerHTML = '0'; // Resetting the template
+    frames = 0;
 }
 
 function spawnEnemies() {
@@ -66,13 +73,76 @@ function spawnEnemies() {
     }, 1000);
 }
 
+function spawnPowerUps() {
+    setInterval(() => {
+        powerUps.push(
+            new PowerUp({
+                position: {
+                    x: -30,
+                    y: Math.random() * canvas.height
+                },
+                velocity: {
+                    x: Math.random() + 1,
+                    y: 0
+                }
+            }));
+    }, 10000);
+}
+
 function animate() { // Animates all array elements
     animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions
+    frames++;
 
     player.update(); // Draws player object
-    powerUp.update();
+
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        const powerUp = powerUps[i];
+
+        if (powerUp.position.x > canvas.width) {
+            powerUps.splice(i, 1);
+        } else {
+            powerUp.update();
+        }
+
+        const distance = Math.hypot( // Calculate the distance between player & a power up.
+            player.x - powerUp.position.x,
+            player.y - powerUp.position.y
+        );
+
+        // Gain power-up
+        if (distance < powerUp.image.height / 2 + player.radius) {
+            powerUps.splice(i, 1);
+            player.powerUp = 'MachineGun';
+            player.color = 'yellow';
+
+            setTimeout(() => {
+                player.powerUp = '';
+                player.color = 'white';
+            }, 6000);
+        }
+    }
+
+    // If player has a machine gun power up active.
+    if (player.powerUp === 'MachineGun') {
+
+        const angle = Math.atan2( // Calculating the angle between where the mouse is and the player.
+            mouse.position.y - player.y,
+            mouse.position.x - player.x
+        );
+
+        const velocity = { // Setting power-up projectile velocity.
+            x: Math.cos(angle) * 5,
+            y: Math.sin(angle) * 5
+        };
+
+        // Every 3 frames, spawn a new projectile during power-up duration.
+        if (frames % 3 === 0) {
+            projectiles.push(new Projectile(player.x, player.y, 5, 'yellow', velocity));
+        }
+    }
+
 
     for (let index = particles.length - 1; index >= 0; index--) { // Track all particles
         const particle = particles[index]; // Individual particle
@@ -176,11 +246,17 @@ addEventListener('click', (event) => {
     ));
 });
 
+addEventListener('mousemove', (event) => {
+    mouse.position.x = event.clientX;
+    mouse.position.y = event.clientY;
+});
+
 // Restart game button
 buttonEl.addEventListener('click', () => {
     init(); // Start computation
     animate();
     spawnEnemies();
+    spawnPowerUps();
     gsap.to('#endGame', {
         opacity: 0,
         scale: 0.8,
@@ -197,6 +273,7 @@ startButtonEl.addEventListener('click', () => {
     init(); // start computation
     animate();
     spawnEnemies();
+    spawnPowerUps();
     gsap.to('#startGame', {
         opacity: 0,
         scale: 0.8,
