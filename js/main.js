@@ -89,6 +89,27 @@ function spawnPowerUps() {
     }, 10000);
 }
 
+function createScoreLabels({ position, score }) {
+    const scoreLabel = document.createElement('label');
+    scoreLabel.innerHTML = score;
+    scoreLabel.style.color = 'white';
+    scoreLabel.style.position = 'absolute';
+    scoreLabel.style.left = position.x + 'px';
+    scoreLabel.style.top = position.y + 'px';
+    scoreLabel.style.userSelect = 'none';
+    document.body.appendChild(scoreLabel);
+
+    gsap.to(scoreLabel, {
+       opacity: 0,
+        y: -30,
+        duration: 0.75,
+        onComplete: () => { // When animation completes
+           scoreLabel.parentNode.removeChild(scoreLabel); // Remove the score label from the DOM.
+        }
+    });
+
+}
+
 function animate() { // Animates all array elements
     animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background
@@ -217,10 +238,12 @@ function animate() { // Animates all array elements
                     gsap.to(enemy, { // Smooth shrink animation
                         radius: enemy.radius - 10
                     });
+                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 100});
                     projectiles.splice(projectileIndex, 1); // Remove collided bullet
                 } else { // When the enemy is destroyed.
                     score += 150;
                     scoreEl.innerHTML = score; // Update template
+                    createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 150});
 
                     enemies.splice(index, 1); // Remove enemy.
                     projectiles.splice(projectileIndex, 1); // Remove bullet
