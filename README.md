@@ -6,7 +6,7 @@
 
 ## About
 <hr>
-This is a 2D browser game built on html canvas using javascript and it currently <br>
+This is a 2D browser game built on html canvas using javascript and it currently
 only runs in the browser using a live server plugin on text editors. <br>
 It is a simple shooter defense game where the player moves around the screen <br> 
 and avoids the moving targets. Eliminate them to gain points, 100 points for a <br>
@@ -19,8 +19,8 @@ Score as many points as you can!
 - Upon reaching the splash screen you will be greeted by a button that starts the game. <br>
 - Once started, oncoming projectiles will begin to swarm the screen. <br>
 - Avoid the projectiles by moving with the `W, A, S, D` keys.
-
-
+- Shoot projectiles by clicking the mouse in the direction you wish to shoot. <br>
+- Eliminate the enemies to accrue points.
 
 ## Tools
 <hr>
