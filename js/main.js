@@ -35,13 +35,13 @@ let frames = 0;
 
 function init() { // Starts & restarts the game
     player = new Player(x, y, 10, 'white'); // Creating the player object
-    projectiles = [];
-    enemies = [];
-    particles = [];
-    powerUps = [];
-    score = 0;
-    scoreEl.innerHTML = '0'; // Resetting the template
-    frames = 0;
+    projectiles = []; // Reset all projectiles.
+    enemies = []; // Reset all enemies.
+    particles = []; // Reset all particle effects.
+    powerUps = []; // Reset all power ups.
+    score = 0; // Reset score.
+    scoreEl.innerHTML = '0'; // Resetting the template.
+    frames = 0; // Reset frame count.
 }
 
 function spawnEnemies() {
@@ -65,9 +65,10 @@ function spawnEnemies() {
             canvas.width / 2 - x
         );
 
-        const velocity = {
-            x: Math.cos(angle),
-            y: Math.sin(angle)
+        // Cos and sin functions when used in tandem, give the perfect ratio to move an object anywhere along a unit circle.
+        const velocity = { // Calculating the velocity to apply to the enemies.
+            x: Math.cos(angle), // Adjacent side (CAH).
+            y: Math.sin(angle) // Opposite side (SOH).
         };
         enemies.push(new Enemy(x, y, radius, color, velocity)); // Creates an enemy
     }, 1000); // 1s
@@ -86,7 +87,7 @@ function spawnPowerUps() {
                     y: 0
                 }
             }));
-    }, 9000); // Every 10 seconds.
+    }, 9000); // Every 9 seconds.
 }
 
 function createScoreLabels({ position, score }) { // Create dynamic score labels in the DOM.

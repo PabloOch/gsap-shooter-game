@@ -8,7 +8,7 @@ class Player {
             x: 0,
             y: 0
         }
-        this.powerUp = '' || null;
+        this.powerUp = '';
     }
 
     draw() { // Draw the player on the canvas.
