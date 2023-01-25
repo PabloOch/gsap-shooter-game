@@ -30,7 +30,7 @@ function spawnEnemies() {
 }
 
 function spawnPowerUps() {
-    setInterval(() => {
+    powerUpsIntervalId = setInterval(() => {
         powerUps.push( // Create new power up
             new PowerUp({
                 position: {
@@ -53,6 +53,7 @@ function createScoreLabels({ position, score }) { // Create dynamic score labels
     scoreLabel.style.left = position.x + 'px'; // collision position on the y-axis.
     scoreLabel.style.top = position.y + 'px'; // collision position on the x-axis.
     scoreLabel.style.userSelect = 'none'; // Make it un-highlightable by the user.
+    scoreLabel.style.pointerEvents = 'none'; // Make it un-clickable by the user.
     document.body.appendChild(scoreLabel); // Adding the label to the DOM.
 
     // Create the raise and fade away effect on the score label.
@@ -64,5 +65,21 @@ function createScoreLabels({ position, score }) { // Create dynamic score labels
             scoreLabel.parentNode.removeChild(scoreLabel); // Garbage collection, remove the score label from the DOM.
         }
     });
+}
 
+function shoot({ x, y }) {
+    if (game.active) {
+        const angle = Math.atan2(
+            y - player.y,
+            x - player.x);
+
+        const velocity = {
+            x: Math.cos(angle) * 5,
+            y: Math.sin(angle) * 5
+        };
+        projectiles.push(
+            new Projectile(player.x, player.y, 5, 'white', velocity
+            ));
+        audio.shoot.play();
+    }
 }
