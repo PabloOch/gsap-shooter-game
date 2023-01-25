@@ -24,4 +24,9 @@ const audio = {
         src: './audio/Select.wav',
         volume: 0.3
     }),
+    backgroundMusic: new Howl({
+        src: './audio/backgroundMusic.wav',
+        volume: 0.1,
+        loop: true
+    }),
 }
