@@ -20,8 +20,8 @@ const mouse = {
 canvas.width = innerWidth; // Window width
 canvas.height = innerHeight; // Window height
 
-const x = canvas.width / 2;
-const y = canvas.height / 2;
+let x;
+let y;
 const friction = 0.99;
 let player;
 let projectiles = [];
@@ -29,6 +29,7 @@ let enemies = [];
 let particles = [];
 let animationId;
 let intervalId;
+let powerUpsIntervalId;
 let score = 0;
 let powerUps = [];
 let frames = 0;
@@ -41,6 +42,8 @@ let audioInitialized = false;
 
 
 function init() { // Starts & restarts the game
+    x = canvas.width / 2;
+    y = canvas.height / 2;
     player = new Player(x, y, 10, 'white'); // Creating the player object
     projectiles = []; // Reset all projectiles.
     enemies = []; // Reset all enemies.
@@ -77,7 +80,7 @@ function animate() { // Animates all array elements.
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions.
     frames++;
 
-    backgroundParticles.forEach((backgroundParticle, index) => {
+    backgroundParticles.forEach((backgroundParticle) => {
         backgroundParticle.draw();
 
         const distance = Math.hypot(player.x - backgroundParticle.position.x, player.y - backgroundParticle.position.y);
@@ -189,6 +192,7 @@ function animate() { // Animates all array elements.
         if (distance - player.radius - enemy.radius < 1) { // Enemy and player collision.
             cancelAnimationFrame(animationId); // End animation
             clearInterval(intervalId); // End interval
+            clearInterval(powerUpsIntervalId); // End power up interval
             audio.death.play(); // Play death sound.
             game.active = false; // Set game to inactive.
 
@@ -259,6 +263,14 @@ function animate() { // Animates all array elements.
 }
 
 
+
+addEventListener('resize', () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    init();
+});
+
 // Spawn projectiles & calculate direction
 addEventListener('click', (event) => {
     if (!audio.backgroundMusic.playing() && !audioInitialized) {
@@ -266,25 +278,27 @@ addEventListener('click', (event) => {
         audioInitialized = true;
     }
 
-    if (game.active) {
-        const angle = Math.atan2(
-            event.clientY - player.y,
-            event.clientX - player.x);
+    shoot({ x: event.clientX, y: event.clientY });
 
-        const velocity = {
-            x: Math.cos(angle) * 5,
-            y: Math.sin(angle) * 5
-        };
-        projectiles.push(
-            new Projectile(player.x, player.y, 5, 'white', velocity
-            ));
-        audio.shoot.play();
-    }
+});
+
+addEventListener('touchstart', (event) => {
+    const x = event.touches[0].clientX;
+    const y = event.touches[0].clientY;
+
+    mouse.position.x = event.touches[0].clientX;
+    mouse.position.y = event.touches[0].clientY;
+
+    shoot({ x, y }); // x: x, y: y
 });
 
 addEventListener('mousemove', (event) => { // Track exact mouse position.
     mouse.position.x = event.clientX;
     mouse.position.y = event.clientY;
+});
+addEventListener('touchmove', (event) => {
+    mouse.position.x = event.touches[0].clientX;
+    mouse.position.y = event.touches[0].clientY;
 });
 
 // Restart game button
@@ -361,5 +375,15 @@ window.addEventListener('keydown', (event) => {
 
         case 'w' : player.velocity.y -= 1;
             break;
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        clearInterval(intervalId);
+        clearInterval(powerUpsIntervalId);
+    } else {
+        spawnEnemies();
+        spawnPowerUps();
     }
 });
