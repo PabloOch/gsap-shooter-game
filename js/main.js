@@ -30,6 +30,10 @@ let intervalId;
 let score = 0;
 let powerUps = [];
 let frames = 0;
+let backgroundParticles = [];
+let game = {
+    active: false
+}
 
 
 
@@ -42,81 +46,50 @@ function init() { // Starts & restarts the game
     score = 0; // Reset score.
     scoreEl.innerHTML = '0'; // Resetting the template.
     frames = 0; // Reset frame count.
-}
+    backgroundParticles = []; // Reset background particles.
+    game = {
+        active: true
+    }
 
-function spawnEnemies() {
-    intervalId = setInterval(() => { // Every 1s
-        const radius = Math.random() * (35-5) + 5; // Random # between 5-35
-        let x;
-        let y;
+    const gridSpacing = 30; // Spacing between each grid line.
 
-        if (Math.random() < 0.5) { // Spawns enemies on the left & right.
-            x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-            y = Math.random() * canvas.height; // Within the horizontal boundary.
-        } else {                   // Spawns enemies on the top & bottom.
-            x = Math.random() * canvas.width; // Within the vertical boundary.
-            y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
-        }
-
-        const color = `hsl(${Math.random() * 360}, 50%, 50%)`; // Randomly color enemies.
-
-        const angle = Math.atan2( // Angle between the player and enemy.
-            canvas.height / 2 - y,
-            canvas.width / 2 - x
-        );
-
-        // Cos and sin functions when used in tandem, give the perfect ratio to move an object anywhere along a unit circle.
-        const velocity = { // Calculating the velocity to apply to the enemies.
-            x: Math.cos(angle), // Adjacent side (CAH).
-            y: Math.sin(angle) // Opposite side (SOH).
-        };
-        enemies.push(new Enemy(x, y, radius, color, velocity)); // Creates an enemy
-    }, 1000); // 1s
-}
-
-function spawnPowerUps() {
-    setInterval(() => {
-        powerUps.push( // Create new power up
-            new PowerUp({
+    for (let x = 0 ; x < canvas.width + gridSpacing; x += gridSpacing) {
+        for (let y = 0; y < canvas.height + gridSpacing; y += gridSpacing) {
+            backgroundParticles.push(new BackgroundParticle({
                 position: {
-                    x: -30, // Spawn to the left of the screen.
-                    y: Math.random() * canvas.height // Within the screen
+                    x, // x: x
+                    y  // y: y
                 },
-                velocity: {
-                    x: Math.random() + 1, // Random speed between 1 and 2.
-                    y: 0
-                }
+                radius: 3
             }));
-    }, 9000); // Every 9 seconds.
-}
-
-function createScoreLabels({ position, score }) { // Create dynamic score labels in the DOM.
-    const scoreLabel = document.createElement('label'); // Creating label element.
-    scoreLabel.innerHTML = score; // Setting its content to the necessary score that is passed in.
-    scoreLabel.style.color = 'white'; // Setting it to white.
-    scoreLabel.style.position = 'absolute'; // Setting its position property to absolute to allow overlaying.
-    scoreLabel.style.left = position.x + 'px'; // collision position on the y-axis.
-    scoreLabel.style.top = position.y + 'px'; // collision position on the x-axis.
-    scoreLabel.style.userSelect = 'none'; // Make it un-highlightable by the user.
-    document.body.appendChild(scoreLabel); // Adding the label to the DOM.
-
-    // Create the raise and fade away effect on the score label.
-    gsap.to(scoreLabel, {
-        opacity: 0,
-        y: -30,
-        duration: 0.75,
-        onComplete: () => { // When animation completes
-           scoreLabel.parentNode.removeChild(scoreLabel); // Garbage collection, remove the score label from the DOM.
         }
-    });
-
+    }
 }
+
 
 function animate() { // Animates all array elements.
     animationId = requestAnimationFrame(animate); // Continuously redraws the canvas to track all movement.
     ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Sets black background.
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Sets canvas dimensions.
     frames++;
+
+    backgroundParticles.forEach((backgroundParticle, index) => {
+        backgroundParticle.draw();
+
+        const distance = Math.hypot(player.x - backgroundParticle.position.x, player.y - backgroundParticle.position.y);
+
+        if (distance < 100) {
+            backgroundParticle.alpha = 0;
+
+            if (distance > 70) {
+                backgroundParticle.alpha = 0.5;
+            }
+        } else if (distance > 100 && backgroundParticle.alpha < 0.1) {
+            backgroundParticle.alpha += 0.01;
+        } else if (distance > 100 && backgroundParticle.alpha > 0.1) {
+            backgroundParticle.alpha -= 0.01;
+        }
+    });
 
     player.update(); // Draws player object
 
@@ -137,6 +110,7 @@ function animate() { // Animates all array elements.
 
         // Gain power-up
         if (distance < powerUp.image.height / 2 + player.radius) { // Player and power up collide.
+            audio.powerUp.play(); // Play power up sound.
             powerUps.splice(i, 1); // Remove it from computation after pick up.
             player.powerUp = 'MachineGun'; // Updating player power up property.
             player.color = 'yellow'; // Changing player color to reflect power-up pick up.
@@ -164,6 +138,9 @@ function animate() { // Animates all array elements.
         // Every 3 frames, spawn a new projectile during power-up duration.
         if (frames % 3 === 0) {
             projectiles.push(new Projectile(player.x, player.y, 5, 'yellow', velocity)); // Create a new projectile every 3 frames.
+        }
+        if (frames % 6 === 0) {
+            audio.shoot.play();
         }
     }
 
@@ -208,6 +185,8 @@ function animate() { // Animates all array elements.
         if (distance - player.radius - enemy.radius < 1) { // Enemy and player collision.
             cancelAnimationFrame(animationId); // End animation
             clearInterval(intervalId); // End interval
+            audio.death.play(); // Play death sound.
+            game.active = false; // Set game to inactive.
 
             modalEl.style.display = 'block'; // Toggle restart modal
             gsap.fromTo('#endGame', {scale: 0.8, opacity: 0}, { // Modal animation
@@ -240,6 +219,7 @@ function animate() { // Animates all array elements.
                 }
 
                 if (enemy.radius - 10 > 7 ) { // Shrink enemy on collision.
+                    audio.damageTaken.play();
                     score += 100; // Increment score.
                     scoreEl.innerHTML = score; // Update template
 
@@ -252,6 +232,20 @@ function animate() { // Animates all array elements.
                     score += 150; // Increment score
                     scoreEl.innerHTML = score; // Update template
                     createScoreLabels({position: {x: projectile.x, y: projectile.y }, score: 150}); // Create a score label for each elimination.
+
+                    // If an enemy is destroyed, change the background particles to the color of the destroyed enemy.
+                    backgroundParticles.forEach((backgroundParticle) => {
+                        gsap.set(backgroundParticle, {
+                           color: 'white',
+                            alpha: 1
+                        });
+                        gsap.to(backgroundParticle, {
+                           color: enemy.color,
+                            alpha: 0.1
+                        });
+                        // backgroundParticle.color = enemy.color;
+                    });
+                    audio.explode.play();
                     enemies.splice(index, 1); // Remove enemy.
                     projectiles.splice(projectileIndex, 1); // Remove bullet
                 }
@@ -263,17 +257,20 @@ function animate() { // Animates all array elements.
 
 // Spawn projectiles & calculate direction
 addEventListener('click', (event) => {
-    const angle = Math.atan2(
-        event.clientY - player.y,
-        event.clientX - player.x);
+    if (game.active) {
+        const angle = Math.atan2(
+            event.clientY - player.y,
+            event.clientX - player.x);
 
-    const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5
-    };
-    projectiles.push(
-        new Projectile(player.x, player.y, 5, 'white', velocity
-    ));
+        const velocity = {
+            x: Math.cos(angle) * 5,
+            y: Math.sin(angle) * 5
+        };
+        projectiles.push(
+            new Projectile(player.x, player.y, 5, 'white', velocity
+            ));
+        audio.shoot.play();
+    }
 });
 
 addEventListener('mousemove', (event) => { // Track exact mouse position.
@@ -283,6 +280,7 @@ addEventListener('mousemove', (event) => { // Track exact mouse position.
 
 // Restart game button
 buttonEl.addEventListener('click', () => {
+    audio.select.play();
     init(); // Start computation
     animate(); // Begin animation
     spawnEnemies(); // Spawn enemies
@@ -300,6 +298,7 @@ buttonEl.addEventListener('click', () => {
 
 // Start game button
 startButtonEl.addEventListener('click', () => {
+    audio.select.play();
     init(); // start computation
     animate();
     spawnEnemies();
