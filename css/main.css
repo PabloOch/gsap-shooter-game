@@ -65,3 +65,10 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+#volume-up,
+#volume-off {
+    color: white;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}

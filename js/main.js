@@ -1,5 +1,7 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
+const volumeUpEl = document.querySelector('#volume-up');
+const volumeOffEl = document.querySelector('#volume-off');
 
 const scoreEl = document.getElementById('scoreEl');
 const modalEl = document.getElementById('endGame');
@@ -34,6 +36,7 @@ let backgroundParticles = [];
 let game = {
     active: false
 }
+let audioInitialized = false;
 
 
 
@@ -50,6 +53,7 @@ function init() { // Starts & restarts the game
     game = {
         active: true
     }
+    audioInitialized = false;
 
     const gridSpacing = 30; // Spacing between each grid line.
 
@@ -257,6 +261,11 @@ function animate() { // Animates all array elements.
 
 // Spawn projectiles & calculate direction
 addEventListener('click', (event) => {
+    if (!audio.backgroundMusic.playing() && !audioInitialized) {
+        audio.backgroundMusic.play();
+        audioInitialized = true;
+    }
+
     if (game.active) {
         const angle = Math.atan2(
             event.clientY - player.y,
@@ -312,6 +321,30 @@ startButtonEl.addEventListener('click', () => {
             startModalEl.style.display = 'none';
         }
     });
+});
+
+// Mute everything
+volumeUpEl.addEventListener('click', () => {
+    audio.backgroundMusic.pause();
+    volumeOffEl.style.display = 'block';
+    volumeUpEl.style.display = 'none';
+
+    for (let key in audio) {
+        audio[key].mute(true);
+    }
+});
+
+// Unmute everything
+volumeOffEl.addEventListener('click', () => {
+    if (audioInitialized) {
+        audio.backgroundMusic.play();
+        volumeUpEl.style.display = 'block';
+        volumeOffEl.style.display = 'none';
+    }
+
+    for (let key in audio) {
+        audio[key].mute(false);
+    }
 });
 
 // Listen for player movement
