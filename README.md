@@ -1,9 +1,3 @@
-<a name="#readme-top"></a>
-# Base Defense Game
-<hr>
-
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
-
 ## About
 <hr>
 This is a 2D browser game built on html canvas using javascript and it currently
